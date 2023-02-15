@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -240,6 +241,24 @@ public class Main {
 
     private static void task15() throws IOException {
         List<Flower> flowers = Util.getFlowers();
-        //        Продолжить...
+        Comparator<Flower> comparator = Comparator.comparing(Flower::getOrigin).reversed()
+                .thenComparing(Flower::getPrice)
+                .thenComparing((f1, f2) -> Double.compare(f2.getWaterConsumptionPerDay(), f1.getWaterConsumptionPerDay()));
+        Predicate<Flower> inputCharFilter = f -> Pattern.matches("[C-S]", Character.toString(f.getCommonName().charAt(0)));
+        Predicate<Flower> flowerVaseMaterialFilter = f -> f.isShadePreferred() && (
+                f.getFlowerVaseMaterial().contains("Aluminum")
+                        || f.getFlowerVaseMaterial().contains("Glass")
+                        || f.getFlowerVaseMaterial().contains("Steel")
+        );
+        System.out.printf("%.3f", flowers
+                .stream()
+                .sorted(comparator)
+                .filter(inputCharFilter)
+                .filter(flowerVaseMaterialFilter)
+                .mapToDouble(f -> f.getPrice() + f.getWaterConsumptionPerDay() * 1825 / 1000 * 1.39)    //  1825 - five years to days
+                                                                                                        //  1000 - 1 liter to meter cubed
+                .reduce(Double::sum)
+                .getAsDouble()
+        );
     }
 }
