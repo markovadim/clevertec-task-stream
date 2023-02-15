@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -33,6 +34,7 @@ public class Main {
         task13();
         task14();
         task15();
+        task16();
     }
 
     private static void task1() throws IOException {
@@ -259,6 +261,29 @@ public class Main {
                                                                                                         //  1000 - 1 liter to meter cubed
                 .reduce(Double::sum)
                 .getAsDouble()
+        );
+    }
+
+    private static void task16() throws IOException {
+        List<Car> cars = Util.getCars();
+        List<Person> people = Util.getPersons();
+
+        Person person = people
+                .stream()
+                .filter(p -> "Mario".equalsIgnoreCase(p.getFirstName()) && "Yuill".equalsIgnoreCase(p.getLastName()))
+                .findAny().orElseThrow();
+
+        Function<Car, Double> fun = car -> ((car.getPrice() - 15000) * 1.17) / (0.2 * person.getDateOfBirth().getYear());   // 15000 - Mario money, 1.17 - 117% Mario will be pay, 0.2 - 20% of salary
+
+        System.out.printf("%.2f", cars
+                .stream()
+                .filter(c -> "BMW".equalsIgnoreCase(c.getCarMake()))
+                .filter(c -> (LocalDate.now().getYear() - c.getReleaseYear()) < 13)
+                .filter(c -> Pattern.matches("[0-9]", Character.toString(c.getVin().charAt(0))))
+                .sorted(Comparator.comparing(Car::getReleaseYear).thenComparing(Car::getMass))
+                .findFirst()
+                .map(fun)
+                .orElseThrow()
         );
     }
 }
